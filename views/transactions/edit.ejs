@@ -1,0 +1,16 @@
+<%- include('layouts/main') %>
+<h2>Edit Transaction</h2>
+<form action="/transactions/<%= transaction._id %>" method="POST">
+    <label for="type">Type</label>
+    <select name="type" id="type" required>
+        <option value="Income" <%= transaction.type === 'Income' ? 'selected' : '' %>>Income</option>
+        <option value="Expense" <%= transaction.type === 'Expense' ? 'selected' : '' %>>Expense</option>
+    </select>
+    <label for="amount">Amount</label>
+    <input type="number" name="amount" id="amount" value="<%= transaction.amount %>" required>
+    <label for="description">Description</label>
+    <input type="text" name="description" id="description" value="<%= transaction.description %>" required>
+    <label for="date">Date</label>
+    <input type="date" name="date" id="date" value="<%= transaction.date.toISOString().split('T')[0] %>" required>
+    <button class="button">Update Transaction</button>
+</form>
