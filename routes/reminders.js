@@ -1,52 +1,69 @@
 const express = require('express');
-const Reminder = require('../models/Reminder');
 const router = express.Router();
 
-// View all reminders - No need for user-specific queries anymore
-router.get('/', async (req, res) => {
-  const reminders = await Reminder.find({}); // Remove user filtering
-  res.render('reminders', { reminders });
+// View all reminders
+router.get('/', (req, res) => {
+  res.render('reminders', { reminders: req.reminders });
 });
 
 // Add reminder form
-router.get('/add', (req, res) => res.render('addReminder'));
+router.get('/add', (req, res) => {
+  res.render('addReminder');
+});
 
 // Add reminder action
-router.post('/add', async (req, res) => {
+router.post('/add', (req, res) => {
   const { title, description, date } = req.body;
-  const reminder = new Reminder({
+  const reminder = {
+    id: req.reminders.length + 1, // Simple ID increment
     title,
     description,
-    date,
-    completed: false
-  });
-  await reminder.save();
+    date: new Date(date),
+    completed: false,
+  };
+  req.reminders.push(reminder); // Add to in-memory array
   res.redirect('/reminders');
 });
 
 // Mark reminder as completed
-router.post('/complete/:id', async (req, res) => {
-  await Reminder.findByIdAndUpdate(req.params.id, { completed: true });
+router.post('/complete/:id', (req, res) => {
+  const reminder = req.reminders.find(r => r.id === parseInt(req.params.id));
+  if (reminder) {
+    reminder.completed = true;
+  }
   res.redirect('/reminders');
 });
 
 // Edit reminder form
-router.get('/edit/:id', async (req, res) => {
-  const reminder = await Reminder.findById(req.params.id);
-  res.render('editReminder', { reminder });
+router.get('/edit/:id', (req, res) => {
+  const reminder = req.reminders.find(r => r.id === parseInt(req.params.id));
+  if (reminder) {
+    res.render('editReminder', { reminder });
+  } else {
+    res.redirect('/reminders');
+  }
 });
 
 // Update reminder
-router.post('/edit/:id', async (req, res) => {
+router.post('/edit/:id', (req, res) => {
   const { title, description, date } = req.body;
-  await Reminder.findByIdAndUpdate(req.params.id, { title, description, date });
+  const reminder = req.reminders.find(r => r.id === parseInt(req.params.id));
+  if (reminder) {
+    reminder.title = title;
+    reminder.description = description;
+    reminder.date = new Date(date);
+  }
   res.redirect('/reminders');
 });
 
 // Delete reminder
-router.post('/delete/:id', async (req, res) => {
-  await Reminder.findByIdAndDelete(req.params.id);
+router.post('/delete/:id', (req, res) => {
+  req.reminders = req.reminders.filter(r => r.id !== parseInt(req.params.id));
   res.redirect('/reminders');
 });
 
-module.exports = router;
+module.exports = (reminders) => {
+  // Attach in-memory array to the router so routes can access it
+  return router;
+};
+
