@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Your Transactions</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header'); %>
+  <main>
+    <h1>Your Transactions</h1>
+    <a href="/transactions/add">Add New Transaction</a>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% transactions.forEach(transaction => { %>
+          <tr>
+            <td><%= transaction.description %></td>
+            <td><%= transaction.amount %></td>
+            <td><%= transaction.type %></td>
+            <td>
+              <a href="/transactions/edit/<%= transaction._id %>">Edit</a>
+              <form method="POST" action="/transactions/delete/<%= transaction._id %>" style="display:inline;">
+                <button type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </main>
+  <%- include('partials/footer'); %>
+</body>
+</html>

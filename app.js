@@ -1,29 +1,32 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-const transactionRoutes = require('./routes/transactions');
+const session = require('express-session');
+const passport = require('passport');
+const connectDB = require('./config/db');
 
 dotenv.config();
-const app = express();
-
-// Database Connection
-const connectDB = require('./config/database');
 connectDB();
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
+const app = express();
 app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: false }));
+
+// Session Middleware
+app.use(session({
+  secret: 'yourSecret',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+// Passport Middleware
+require('./config/passport')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Routes
-app.use('/transactions', transactionRoutes);
+app.use('/', require('./routes/auth'));
+app.use('/transactions', require('./routes/transactions'));
 
-// Home Route
-app.get('/', (req, res) => {
-    res.render('index');
-});
-
-// Server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
