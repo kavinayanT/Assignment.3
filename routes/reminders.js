@@ -2,9 +2,9 @@ const express = require('express');
 const Reminder = require('../models/Reminder');
 const router = express.Router();
 
-// View all reminders
+// View all reminders - No need for user-specific queries anymore
 router.get('/', async (req, res) => {
-  const reminders = await Reminder.find({ user: req.user._id });
+  const reminders = await Reminder.find({}); // Remove user filtering
   res.render('reminders', { reminders });
 });
 
@@ -15,7 +15,6 @@ router.get('/add', (req, res) => res.render('addReminder'));
 router.post('/add', async (req, res) => {
   const { title, description, date } = req.body;
   const reminder = new Reminder({
-    user: req.user._id,
     title,
     description,
     date,
